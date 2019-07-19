@@ -8,22 +8,34 @@ using Random = UnityEngine.Random;
 public class LevelGenerator : MonoBehaviour
 {
 
-
     private float _blockWidth = (float)Math.Pow(2f, 0.5f);
     private float _halfblockWidth = ((float)Math.Pow(2f, 0.5f))/2f;
 
-    public int initialRowCount = 10;
+    private Queue<float> _distanceToSpawnNextWallQueue = new Queue<float>();
+
+    public int initialRowCount = 5;
     public int initialRowWidth = 7;
 
     public GameObject wallBlockPrefab;
     public GameObject floorBlockPrefab;
 
+    void Update()
+    {
+		//Check queue each frame against ball position
+    }
+
     // Use this for initialization
-    void Start () {
-        for (int i = 0; i < initialRowCount; i++)
-        {
-            SpawnNextRow(i);
-        }
+    void Start ()
+    {
+	    SpawnStarterRows();
+    }
+
+    private void SpawnStarterRows()
+    {
+	    for (int i = 0; i < initialRowCount; i++)
+	    {
+		    SpawnNextRow(i);
+	    }
 	}
 
     public void SpawnNextRow(float rowNumber)
@@ -33,9 +45,7 @@ public class LevelGenerator : MonoBehaviour
 
         SpawnWalls(rowNumber, isSmallRow);
 
-
         //Floor blocks
-        //TODO - make this flexible
         for (int i = 0; i < floorRowWidth; i++)
         {
             FloorBlockController floorBlock;
