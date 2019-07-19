@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.Scripts;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -14,7 +15,8 @@ public class LevelGenerator : MonoBehaviour
     public int initialRowCount = 10;
     public int initialRowWidth = 7;
 
-    public GameObject wallBlock;
+    public GameObject wallBlockPrefab;
+    public GameObject floorBlockPrefab;
 
     // Use this for initialization
     void Start () {
@@ -31,13 +33,15 @@ public class LevelGenerator : MonoBehaviour
 
         SpawnWalls(rowNumber, isSmallRow);
 
+
         //Floor blocks
         //TODO - make this flexible
         for (int i = 0; i < floorRowWidth; i++)
         {
+            FloorBlockController floorBlock;
             if (isSmallRow)
             {
-                FloorBlockController floorBlock = Instantiate(wallBlock, 
+                floorBlock = Instantiate(floorBlockPrefab, 
                         new Vector3(
                             rowNumber * _blockWidth / 2f,
                             0.1f,
@@ -47,7 +51,7 @@ public class LevelGenerator : MonoBehaviour
             }
             else
             {
-                FloorBlockController floorBlock = Instantiate(wallBlock, 
+                floorBlock = Instantiate(floorBlockPrefab, 
                         new Vector3(
                             rowNumber * _halfblockWidth,
                             0.1f,
@@ -55,6 +59,7 @@ public class LevelGenerator : MonoBehaviour
                         Quaternion.Euler(0, 45, 0))
                     .GetComponent<FloorBlockController>();
             }
+            SetBlockColor(floorBlock.gameObject);
         }
     }
 
@@ -86,13 +91,21 @@ public class LevelGenerator : MonoBehaviour
                 _blockWidth + initialRowWidth * _blockWidth);
         }
 
-        WallBlockController leftWallBlock = Instantiate(wallBlock, new Vector3(leftBlockFinalPosition.x, leftBlockFinalPosition.y - 10, leftBlockFinalPosition.z), Quaternion.Euler(0, 45, 0))
+        WallBlockController leftWallBlock = Instantiate(wallBlockPrefab, new Vector3(leftBlockFinalPosition.x, leftBlockFinalPosition.y - 10, leftBlockFinalPosition.z), Quaternion.Euler(0, 45, 0))
             .GetComponent<WallBlockController>();
-        WallBlockController rightWallBlock = Instantiate(wallBlock, new Vector3(rightBlockFinalPosition.x, rightBlockFinalPosition.y - 10, rightBlockFinalPosition.z), Quaternion.Euler(0, 45, 0))
+        WallBlockController rightWallBlock = Instantiate(wallBlockPrefab, new Vector3(rightBlockFinalPosition.x, rightBlockFinalPosition.y - 10, rightBlockFinalPosition.z), Quaternion.Euler(0, 45, 0))
             .GetComponent<WallBlockController>();
+
+        SetBlockColor(leftWallBlock.gameObject);
+        SetBlockColor(rightWallBlock.gameObject);
 
         leftWallBlock.MoveToPosition(leftBlockFinalPosition);
         rightWallBlock.MoveToPosition(rightBlockFinalPosition);
+    }
+
+    private void SetBlockColor(GameObject block)
+    {
+        block.GetComponent<Renderer>().material.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
     }
 
 }
