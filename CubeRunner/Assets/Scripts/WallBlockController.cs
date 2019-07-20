@@ -4,23 +4,22 @@ using Assets.Scripts;
 using DG.Tweening;
 using UnityEngine;
 
-public class WallBlockController : MonoBehaviour, IBlockController
+public class WallBlockController : BlockController
 {
-    public Material baseMaterial;
-
 	// Use this for initialization
-	void Start () {
+	void Start ()
+	{
+	    SetWallColor();
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		
+	void Update ()
+	{
+	    DestroyIfFarFromPlayer();
 	}
 
-    public void MoveToPosition(Vector3 position)
+    private void SetWallColor()
     {
-        transform.DOMove(position, 2);
-        transform.DOShakeRotation(2);
-        baseMaterial.DOFade(255, 3);
+        gameObject.GetComponent<Renderer>().material.color = Color.gray;
     }
 }
