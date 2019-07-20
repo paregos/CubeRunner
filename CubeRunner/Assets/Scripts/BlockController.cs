@@ -7,9 +7,12 @@ namespace Assets.Scripts
     {
         public Material baseMaterial;
 
-        public bool isHazard = false;
-        
         private int _rowDistanceBeforeDestruction = 15;
+
+        public virtual bool IsHazard()
+        {
+            return false;
+        }
 
         void Start()
         {

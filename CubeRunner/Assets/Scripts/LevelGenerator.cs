@@ -12,7 +12,7 @@ public class LevelGenerator : MonoBehaviour
     private List<BlockController> _previousRow = new List<BlockController>();
     private int _rowsSpawned = 0;
 
-    public int initialRowWidth = 5;
+    private int initialRowOddWidth = 5;
     public float hazardPercentage = 0.1f;
 
     public GameObject wallBlockPrefab;
@@ -56,7 +56,7 @@ public class LevelGenerator : MonoBehaviour
     public void SpawnNextRow(float rowNumber)
     {
         var isSmallRow = rowNumber % 2 == 1;
-        var floorRowWidth = isSmallRow ? initialRowWidth - 1 : initialRowWidth;
+        var floorRowWidth = isSmallRow ? initialRowOddWidth - 1 : initialRowOddWidth;
 
         SpawnWalls(rowNumber, isSmallRow);
 
@@ -122,7 +122,7 @@ public class LevelGenerator : MonoBehaviour
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.blockWidth / 2f,
                 0.5f,
-                initialRowWidth * GameConstants.blockWidth + GameConstants.halfblockWidth);
+                initialRowOddWidth * GameConstants.blockWidth + GameConstants.halfblockWidth);
         }
         else
         {
@@ -133,7 +133,7 @@ public class LevelGenerator : MonoBehaviour
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.halfblockWidth,
                 0.5f,
-                GameConstants.blockWidth + initialRowWidth * GameConstants.blockWidth);
+                GameConstants.blockWidth + initialRowOddWidth * GameConstants.blockWidth);
         }
 
         var gameobj1 = Instantiate(wallBlockPrefab,
@@ -159,7 +159,7 @@ public class LevelGenerator : MonoBehaviour
     private List<bool> GenerateNextRowHazardFlags()
     {
         List<bool> nextRowHazardFlags = new List<bool>();
-        var nextRowLength = _previousRow.Count == 0 ? initialRowWidth : _previousRow.Count % 2 == 0 ? initialRowWidth - 1 : initialRowWidth;
+        var nextRowLength = _previousRow.Count == 0 ? initialRowOddWidth : isLargeRow(_previousRow.Count) ? initialRowOddWidth - 1 : initialRowOddWidth;
 
         //For starter rows make them hazard free
         if (_rowsSpawned < GameConstants.rowLeadLength)
@@ -179,7 +179,7 @@ public class LevelGenerator : MonoBehaviour
         }
 
         // Clear hazards so there is a viable path
-        var safeNextRowIndexs = GenerateNextRowSafeIndexs();
+        var safeNextRowIndexs = GenerateNextRowSafeIndexs().ToList();
         var foundSafePath = false;
 
         // Check if a safe path exists
@@ -207,26 +207,37 @@ public class LevelGenerator : MonoBehaviour
         var safeNextRowIndexs = new HashSet<int>();
         for (int i = 0; i < _previousRow.Count; i++)
         {
-            if (!_previousRow[i].isHazard)
+            if (!_previousRow[i].IsHazard())
             {
-                if (i > 0 || !isLargeRow(_previousRow.Count))
+                if (!isLargeRow(_previousRow.Count))
                 {
-                    safeNextRowIndexs.Add(i - i);
+                    safeNextRowIndexs.Add(i);
+                    safeNextRowIndexs.Add(i+1);
                 }
-
-                if (i < _previousRow.Count-1 || !isLargeRow(_previousRow.Count))
+                else
                 {
-                    safeNextRowIndexs.Add(i + i);
+                    if (i < _previousRow.Count - 1)
+                    {
+                        safeNextRowIndexs.Add(i);
+                    }
+
+                    if (i > 0)
+                    {
+                        safeNextRowIndexs.Add(i - 1);
+                    }
                 }
             }
         }
+
+        var x = safeNextRowIndexs.ToList();
 
         return safeNextRowIndexs;
     }
 
     public bool isLargeRow(int rowLength)
     {
-        return rowLength % 2 == 0;
+        // Odd rows are always large
+        return rowLength % 2 == 1;
     }
 
 }
