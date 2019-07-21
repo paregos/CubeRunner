@@ -22,10 +22,10 @@ GameObject:
   - component: {fileID: 33795728277792036}
   - component: {fileID: 23834735602476012}
   - component: {fileID: 65328509301199590}
-  - component: {fileID: 114996087296226044}
+  - component: {fileID: 114146241035623434}
   m_Layer: 0
   m_Name: FloorCube
-  m_TagString: Untagged
+  m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -97,7 +97,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114996087296226044
+--- !u!114 &114146241035623434
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -105,8 +105,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1615308385015576}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70e1214f717182445bd9e1fb52f560af, type: 3}
+  m_Script: {fileID: 11500000, guid: 212423ed568a3864c962c7dcb22043a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   baseMaterial: {fileID: 2100000, guid: 1b82fdb2e69b48d479b5ecf9b393dc4d, type: 2}
-  rowDistanceBeforeDestruction: 15

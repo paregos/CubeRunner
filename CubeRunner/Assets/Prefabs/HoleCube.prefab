@@ -20,10 +20,10 @@ GameObject:
   m_Component:
   - component: {fileID: 4975343180515184}
   - component: {fileID: 65113661534266040}
-  - component: {fileID: 114497209262250708}
+  - component: {fileID: 114267755005498692}
   m_Layer: 0
   m_Name: HoleCube
-  m_TagString: Untagged
+  m_TagString: Block
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -53,7 +53,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114497209262250708
+--- !u!114 &114267755005498692
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -61,7 +61,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1120764452125036}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26430c3a037505b41881a91b5d1489e2, type: 3}
+  m_Script: {fileID: 11500000, guid: 694e36400bdd4b143bd8b386acdc8dd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   baseMaterial: {fileID: 0}

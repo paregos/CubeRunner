@@ -3,14 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Scripts;
+using Assets.Scripts.Blocks;
+using Assets.Scripts.Player;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class LevelGenerator : MonoBehaviour
 {
     private Queue<float> _distanceToSpawnNextWallQueue = new Queue<float>();
-    private List<BlockController> _previousRow = new List<BlockController>();
+    private List<PreviousBlockState> _previousRowState = new List<PreviousBlockState>();
     private int _rowsSpawned = 0;
+    private System.Random rnd = new System.Random();
 
     private int initialRowOddWidth = 5;
     public float hazardPercentage = 0.1f;
@@ -21,6 +24,12 @@ public class LevelGenerator : MonoBehaviour
 
     public GameObject mainPlayer;
 
+    // Use this for initialization
+    void Start()
+    {
+        ResetLevel();
+    }
+
     void Update()
     {
 		//Check queue each frame against ball position
@@ -30,19 +39,16 @@ public class LevelGenerator : MonoBehaviour
         {
             _distanceToSpawnNextWallQueue.Dequeue();
             SpawnNextRow(_rowsSpawned);
+            mainPlayer.GetComponent<PlayerController>().IncrementNumberOfRowsPassed();
         }
     }
 
     public void ResetLevel()
     {
         _rowsSpawned = 0;
+        _previousRowState = new List<PreviousBlockState>();
+        _distanceToSpawnNextWallQueue =  new Queue<float>();
         SpawnStarterRows();
-    }
-
-    // Use this for initialization
-    void Start ()
-    {
-	    SpawnStarterRows();
     }
 
     private void SpawnStarterRows()
@@ -62,7 +68,6 @@ public class LevelGenerator : MonoBehaviour
 
         //GenerateNextRowHazards
         var nextRowHazardFlags = GenerateNextRowHazardFlags();
-        _previousRow = new List<BlockController>();
 
         //Floor blocks
         for (int i = 0; i < nextRowHazardFlags.Count; i++)
@@ -99,9 +104,6 @@ public class LevelGenerator : MonoBehaviour
                     GameConstants.blockWidth + i * GameConstants.blockWidth),
                     rowNumber <= GameConstants.rowLeadLength);
             }
-
-            //Add block to previous row list
-            _previousRow.Add(floorBlock);
         }
 
         _rowsSpawned++;
@@ -150,16 +152,11 @@ public class LevelGenerator : MonoBehaviour
         rightWallBlock.MoveToPosition(rightBlockFinalPosition, rowNumber <= GameConstants.rowLeadLength);
     }
 
-
-    private Vector3 GenerateRandomVector3BeyondXValue(float x)
-    {
-        return new Vector3(x + Random.Range(1, 10), Random.Range(1, 10), Random.Range(1, 10));
-    }
-
     private List<bool> GenerateNextRowHazardFlags()
     {
         List<bool> nextRowHazardFlags = new List<bool>();
-        var nextRowLength = _previousRow.Count == 0 ? initialRowOddWidth : isLargeRow(_previousRow.Count) ? initialRowOddWidth - 1 : initialRowOddWidth;
+        List<int> safeNextRowIndexs = new List<int>();
+        var nextRowLength = _previousRowState.Count == 0 ? initialRowOddWidth : isLargeRow(_previousRowState.Count) ? initialRowOddWidth - 1 : initialRowOddWidth;
 
         //For starter rows make them hazard free
         if (_rowsSpawned < GameConstants.rowLeadLength)
@@ -167,7 +164,10 @@ public class LevelGenerator : MonoBehaviour
             for (int i = 0; i < nextRowLength; i++)
             {
                 nextRowHazardFlags.Add(false);
+                safeNextRowIndexs.Add(i);
             }
+
+            SetPreviousRowState(nextRowHazardFlags, safeNextRowIndexs);
 
             return nextRowHazardFlags;
         }
@@ -179,7 +179,7 @@ public class LevelGenerator : MonoBehaviour
         }
 
         // Clear hazards so there is a viable path
-        var safeNextRowIndexs = GenerateNextRowSafeIndexs().ToList();
+        safeNextRowIndexs = GenerateNextRowSafeIndexs().ToList();
         var foundSafePath = false;
 
         // Check if a safe path exists
@@ -196,8 +196,11 @@ public class LevelGenerator : MonoBehaviour
         //TODO - improve selection
         if (!foundSafePath)
         {
-            nextRowHazardFlags[safeNextRowIndexs.First()] = false;
+            nextRowHazardFlags[safeNextRowIndexs[rnd.Next(safeNextRowIndexs.Count)]] = false;
         }
+
+        // Set next Row hazards as previous Hazards
+        SetPreviousRowState(nextRowHazardFlags, safeNextRowIndexs);
 
         return nextRowHazardFlags;
     }
@@ -205,18 +208,18 @@ public class LevelGenerator : MonoBehaviour
     private HashSet<int> GenerateNextRowSafeIndexs()
     {
         var safeNextRowIndexs = new HashSet<int>();
-        for (int i = 0; i < _previousRow.Count; i++)
+        for (int i = 0; i < _previousRowState.Count; i++)
         {
-            if (!_previousRow[i].IsHazard())
+            if (!_previousRowState[i].isHazard && _previousRowState[i].isValidPath)
             {
-                if (!isLargeRow(_previousRow.Count))
+                if (!isLargeRow(_previousRowState.Count))
                 {
                     safeNextRowIndexs.Add(i);
                     safeNextRowIndexs.Add(i+1);
                 }
                 else
                 {
-                    if (i < _previousRow.Count - 1)
+                    if (i < _previousRowState.Count - 1)
                     {
                         safeNextRowIndexs.Add(i);
                     }
@@ -229,9 +232,25 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        var x = safeNextRowIndexs.ToList();
-
         return safeNextRowIndexs;
+    }
+
+    private void SetPreviousRowState(List<bool> nextRowHazardFlags, IEnumerable<int> safeNextRowIndexs)
+    {
+        var nextPreviousRowState = new List<PreviousBlockState>();
+        for (int i = 0; i < nextRowHazardFlags.Count; i++)
+        {
+            if (safeNextRowIndexs.Contains(i))
+            {
+                if (!nextRowHazardFlags[i])
+                {
+                    nextPreviousRowState.Add(new PreviousBlockState { isHazard = false, isValidPath = true });
+                    continue;
+                }
+            }
+            nextPreviousRowState.Add(new PreviousBlockState { isHazard = nextRowHazardFlags[i], isValidPath = false });
+        }
+        _previousRowState = nextPreviousRowState;
     }
 
     public bool isLargeRow(int rowLength)
@@ -240,4 +259,13 @@ public class LevelGenerator : MonoBehaviour
         return rowLength % 2 == 1;
     }
 
+    public int GetNumberOfRowsSpawned()
+    {
+        return _rowsSpawned;
+    }
+
+    private Vector3 GenerateRandomVector3BeyondXValue(float x)
+    {
+        return new Vector3(x + Random.Range(1, 10), Random.Range(1, 10), Random.Range(1, 10));
+    }
 }
