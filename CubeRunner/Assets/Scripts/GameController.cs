@@ -8,6 +8,7 @@ namespace Assets.Scripts
 
         public LevelGenerator LevelGenerator;
         public PlayerController player;
+        public CameraFollow camera;
 
         private bool firstPlay = true;
 
@@ -32,7 +33,7 @@ namespace Assets.Scripts
                 firstPlay = false;
             }
 
-           
+            camera.Reset();
             player.ResetPlayer();
         }
 

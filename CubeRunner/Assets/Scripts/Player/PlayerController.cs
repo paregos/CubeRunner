@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Player
 {
@@ -6,10 +7,21 @@ namespace Assets.Scripts.Player
     {
         public Vector3 initialVelocity;
         public Vector3 initialPosition;
+        public Color initialColor;
+        public Color highlightColor;
 
         private int _numberOfRowsPassed;
         private Rigidbody _Rigidbody;
         private Vector3 _nextPlayerVelocity;
+
+        //TODO REMOVE DEBUG FUNCTION
+
+        public void SetInitialVelocity(Slider slider)
+        {
+            initialVelocity = new Vector3(slider.value, 0, slider.value);
+        }
+
+        //END TODO
 
         void Start()
         {
@@ -88,6 +100,16 @@ namespace Assets.Scripts.Player
         public int GetNumberOfRowsPassed()
         {
             return _numberOfRowsPassed;
+        }
+
+        public void TurnOnHighLight()
+        {
+            gameObject.GetComponent<Renderer>().material.color = highlightColor;
+        }
+
+        public void TurnOffHighlight()
+        {
+            gameObject.GetComponent<Renderer>().material.color = initialColor;
         }
     }
 }

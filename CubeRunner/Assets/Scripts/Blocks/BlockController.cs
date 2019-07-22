@@ -10,7 +10,9 @@ namespace Assets.Scripts.Blocks
     {
         public Material baseMaterial;
 
-        private int _rowDistanceBeforeDestruction = 5;
+        public bool isValidPath;
+
+        private int _rowDistanceBeforeDestruction = 9;
 
         public virtual bool IsHazard()
         {
@@ -25,10 +27,30 @@ namespace Assets.Scripts.Blocks
         {
             var player = GameObject.Find("Player");
             var playerPosition = player.transform.position;
-            if (Math.Abs(gameObject.transform.position.x - playerPosition.x) < 0.1 && Math.Abs(gameObject.transform.position.z - playerPosition.z) < 0.1)
+            var playerController = player.GetComponent<PlayerController>();
+
+            if (Math.Abs(gameObject.transform.position.x - playerPosition.x) < GameConstants.switchAreaValue && Math.Abs(gameObject.transform.position.z - playerPosition.z) < GameConstants.switchAreaValue)
             {
+                //HighlightPlayer
+                playerController.TurnOnHighLight();
                 HandlePlayerInteraction(player);
             }
+            else
+            {
+                //UnHighlightPlayer
+                if (PlayerCenterIsWithinBlock(playerPosition))
+                {
+                    playerController.TurnOffHighlight();
+                }
+            }
+        }
+
+        public bool PlayerCenterIsWithinBlock(Vector3 playerPosition)
+        {
+            return (transform.position.x + GameConstants.halfblockWidth > playerPosition.x &&
+                    transform.position.x - GameConstants.halfblockWidth < playerPosition.x &&
+                    transform.position.z + GameConstants.halfblockWidth > playerPosition.z &&
+                    transform.position.z - GameConstants.halfblockWidth < playerPosition.z);
         }
 
         public virtual void HandlePlayerInteraction(GameObject player)
@@ -64,7 +86,20 @@ namespace Assets.Scripts.Blocks
 
         public void SetBlockRandomColor(GameObject block)
         {
-            block.GetComponent<Renderer>().material.color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            if (isValidPath && GameConstants.highlightValidPath)
+            {
+                return;
+            }
+
+            if (GameConstants.setRandomColorBlocks)
+            {
+                block.GetComponent<Renderer>().material.SetColor("_EmissionColor", Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f));
+            }
+        }
+
+        public void SetValidPathBlockColor(GameObject block)
+        {
+            block.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.yellow);
         }
     }
 }

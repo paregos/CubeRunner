@@ -8,16 +8,16 @@ namespace Assets.Scripts
     {
         public PlayerController Player;
         public TMP_Text ScoreText;
-        public GameObject playButton;
+        public GameObject endScreen;
 
         public void ShowEndScreen()
         {
-            playButton.SetActive(true);
+            endScreen.SetActive(true);
         }
 
         public void HideEndScreen()
         {
-            playButton.SetActive(false);
+            endScreen.SetActive(false);
         }
 
         private void Update()
