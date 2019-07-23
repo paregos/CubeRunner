@@ -124,6 +124,12 @@ public class LevelGenerator : MonoBehaviour
             {
                 floorBlock.isValidPath = true;
                 floorBlock.SetValidPathBlockColor(floorBlock.gameObject);
+            } else if (rowNumber % 2 == 0)
+            {
+                if (floorBlock.GetType() == typeof(FloorBlockController))
+                {
+                    floorBlock.SetOffSetColor(floorBlock.gameObject);
+                }
             }
 
             //TODO END REMOVE DEBUG CODE

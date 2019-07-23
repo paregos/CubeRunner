@@ -116,14 +116,14 @@ MonoBehaviour:
     overrideState: 0
     value: 15
   tint:
-    overrideState: 1
-    value: 0
+    overrideState: 0
+    value: -62
   colorFilter:
     overrideState: 0
     value: {r: 1, g: 1, b: 1, a: 1}
   hueShift:
     overrideState: 0
-    value: 0
+    value: -11
   saturation:
     overrideState: 0
     value: 0

@@ -12,7 +12,7 @@ namespace Assets.Scripts.Blocks
         public override void HandlePlayerInteraction(GameObject player)
         {
             player.GetComponent<Rigidbody>().velocity = Vector3.down;
-            GameObject.Find("UIController").GetComponent<UIController>().ShowEndScreen();
+            GameObject.Find("GameController").GetComponent<GameController>().StopGame();
         }
     }
 }

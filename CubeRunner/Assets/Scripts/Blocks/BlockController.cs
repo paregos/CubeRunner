@@ -27,21 +27,10 @@ namespace Assets.Scripts.Blocks
         {
             var player = GameObject.Find("Player");
             var playerPosition = player.transform.position;
-            var playerController = player.GetComponent<PlayerController>();
 
             if (Math.Abs(gameObject.transform.position.x - playerPosition.x) < GameConstants.switchAreaValue && Math.Abs(gameObject.transform.position.z - playerPosition.z) < GameConstants.switchAreaValue)
             {
-                //HighlightPlayer
-                playerController.TurnOnHighLight();
                 HandlePlayerInteraction(player);
-            }
-            else
-            {
-                //UnHighlightPlayer
-                if (PlayerCenterIsWithinBlock(playerPosition))
-                {
-                    playerController.TurnOffHighlight();
-                }
             }
         }
 
@@ -93,13 +82,22 @@ namespace Assets.Scripts.Blocks
 
             if (GameConstants.setRandomColorBlocks)
             {
-                block.GetComponent<Renderer>().material.SetColor("_EmissionColor", Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f));
+                var color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+                block.GetComponent<Renderer>().material.color = color;
+                block.GetComponent<Renderer>().material.SetColor("_EmissionColor", color);
             }
         }
 
         public void SetValidPathBlockColor(GameObject block)
         {
             block.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.yellow);
+        }
+
+        public void SetOffSetColor(GameObject block)
+        {
+            var material = block.GetComponent<Renderer>().material;
+            var currentColor = material.GetColor("_EmissionColor");
+            material.SetColor("_EmissionColor", new Color(currentColor.r / 8f, currentColor.g / 8f, currentColor.b / 8f));
         }
     }
 }

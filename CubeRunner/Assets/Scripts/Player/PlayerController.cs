@@ -14,6 +14,8 @@ namespace Assets.Scripts.Player
         private Rigidbody _Rigidbody;
         private Vector3 _nextPlayerVelocity;
 
+        private bool _stopped = true;
+
         //TODO REMOVE DEBUG FUNCTION
 
         public void SetInitialVelocity(Slider slider)
@@ -32,14 +34,28 @@ namespace Assets.Scripts.Player
 
         public void ResetPlayer()
         {
+            _stopped = false;
             transform.position = initialPosition;
             _numberOfRowsPassed = 0;
             _Rigidbody.velocity = initialVelocity;
             _nextPlayerVelocity = _Rigidbody.velocity;
         }
 
+        public void StopPlayer()
+        {
+            _stopped = true;
+            _Rigidbody.velocity = Vector3.zero;
+            _nextPlayerVelocity = Vector3.zero;
+        }
+
         void FixedUpdate()
         {
+            Debug.Log("velocity" + _Rigidbody.velocity);
+            if (_stopped)
+            {
+                return;
+            }
+
             if (Input.touchCount == 1)
             {
                 var touch = Input.touches[0];
@@ -75,9 +91,7 @@ namespace Assets.Scripts.Player
         {
             if (other.gameObject.tag == "Wall")
             {
-                _Rigidbody.velocity = new Vector3(0,0,0);
-
-                GameObject.Find("UIController").GetComponent<UIController>().ShowEndScreen();
+                GameObject.Find("GameController").GetComponent<GameController>().StopGame();
             }
         }
 
@@ -100,16 +114,6 @@ namespace Assets.Scripts.Player
         public int GetNumberOfRowsPassed()
         {
             return _numberOfRowsPassed;
-        }
-
-        public void TurnOnHighLight()
-        {
-            gameObject.GetComponent<Renderer>().material.color = highlightColor;
-        }
-
-        public void TurnOffHighlight()
-        {
-            gameObject.GetComponent<Renderer>().material.color = initialColor;
         }
     }
 }

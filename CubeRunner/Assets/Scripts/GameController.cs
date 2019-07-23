@@ -7,6 +7,7 @@ namespace Assets.Scripts
     {
 
         public LevelGenerator LevelGenerator;
+        public UIController UiController;
         public PlayerController player;
         public CameraFollow camera;
 
@@ -35,6 +36,12 @@ namespace Assets.Scripts
 
             camera.Reset();
             player.ResetPlayer();
+        }
+
+        public void StopGame()
+        {
+            player.StopPlayer();
+            UiController.ShowEndScreen();
         }
 
     }
