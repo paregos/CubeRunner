@@ -17,10 +17,10 @@ MonoBehaviour:
   m_RequireDepthTexture: 0
   m_RequireSoftParticles: 0
   m_SupportsHDR: 0
-  m_MSAA: 8
+  m_MSAA: 1
   m_RenderScale: 3.02
   m_ShadowType: 2
-  m_ShadowAtlasResolution: 4096
+  m_ShadowAtlasResolution: 1024
   m_ShadowNearPlaneOffset: 2
   m_ShadowDistance: 50
   m_ShadowCascades: 0

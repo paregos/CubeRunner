@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Player
@@ -50,7 +51,6 @@ namespace Assets.Scripts.Player
 
         void FixedUpdate()
         {
-            Debug.Log("velocity" + _Rigidbody.velocity);
             if (_stopped)
             {
                 return;
@@ -102,7 +102,10 @@ namespace Assets.Scripts.Player
                 return;
             }
 
-            gameObject.transform.position = new Vector3(changeAtXposition, gameObject.transform.position.y, changeAtZPosition);
+            var rotation = _nextPlayerVelocity.z > 0 ? 45 : 135;
+
+            transform.DORotate(new Vector3(0, rotation, 0), 0.15f, RotateMode.Fast);
+            transform.position = new Vector3(changeAtXposition, gameObject.transform.position.y, changeAtZPosition);
             _Rigidbody.velocity = _nextPlayerVelocity;
         }
 

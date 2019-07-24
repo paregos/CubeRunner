@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Player;
+﻿using Assets.Scripts.Persistence;
+using Assets.Scripts.Player;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -11,11 +12,20 @@ namespace Assets.Scripts
         public PlayerController player;
         public CameraFollow camera;
 
-        private bool firstPlay = true;
+        private bool _firstPlay = true;
+
+        public int bestScoreThisInstance = 0;
+
+        public void Start()
+        {
+            bestScoreThisInstance = SaveManager.Instance.state.HighScore;
+            
+            UiController.SlideSplashScreenIn();
+        }
 
         public void ResetGame()
         {
-            if (!firstPlay)
+            if (!_firstPlay)
             {
                 //Removing all walls and blocks
                 foreach (var wall in GameObject.FindGameObjectsWithTag("Wall"))
@@ -31,7 +41,7 @@ namespace Assets.Scripts
             }
             else
             {
-                firstPlay = false;
+                _firstPlay = false;
             }
 
             camera.Reset();
@@ -40,8 +50,46 @@ namespace Assets.Scripts
 
         public void StopGame()
         {
+            // Update highscore
+            bestScoreThisInstance = bestScoreThisInstance > player.GetNumberOfRowsPassed()
+                ? bestScoreThisInstance
+                : player.GetNumberOfRowsPassed();
+
             player.StopPlayer();
             UiController.ShowEndScreen();
+        }
+
+        private void SaveGame()
+        {
+            if (bestScoreThisInstance > SaveManager.Instance.state.HighScore)
+            {
+                SaveManager.Instance.state.SetState(bestScoreThisInstance);
+                SaveManager.Instance.Save();
+            }
+        }
+
+        void OnApplicationPause(bool gameIsPaused)
+        {
+            if (gameIsPaused)
+            {
+                Debug.Log("game paused");
+                SaveGame();
+            }
+        }
+
+        void OnApplicationQuit()
+        {
+            SaveGame();
+        }
+
+        public int GetCurrentScore()
+        {
+            return player.GetNumberOfRowsPassed();
+        }
+
+        public int GetCurrentBestScore()
+        {
+            return bestScoreThisInstance;
         }
 
     }
