@@ -5,7 +5,7 @@
         // Use this for initialization
         void Start()
         {
-            SetBlockRandomColor(gameObject);
+            //SetBlockRandomColor(gameObject);
         }
 
         // Update is called once per frame

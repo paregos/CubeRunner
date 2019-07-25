@@ -56,27 +56,14 @@ namespace Assets.Scripts.Player
                 return;
             }
 
-            if (Input.touchCount == 1)
+            if (Input.touchCount == 1 && Input.touches[0].phase == TouchPhase.Began)
             {
-                var touch = Input.touches[0];
-                if (touch.position.x < Screen.width / 2)
-                {
-                    _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, Mathf.Abs(_Rigidbody.velocity.z));
-                }
-                else if (touch.position.x > Screen.width / 2)
-                {
-                    _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, Mathf.Abs(_Rigidbody.velocity.z) * -1);
-                }
+                    _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, _Rigidbody.velocity.z * -1);
             }
 
-            if (Input.GetKey("left"))
+            if (Input.GetKeyDown("left"))
             {
-                _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, Mathf.Abs(_Rigidbody.velocity.z));
-            }
-
-            if (Input.GetKey("right"))
-            {
-                _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, Mathf.Abs(_Rigidbody.velocity.z) * -1);
+                _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, _Rigidbody.velocity.z * -1);
             }
 
             //accelerate
@@ -117,6 +104,13 @@ namespace Assets.Scripts.Player
         public int GetNumberOfRowsPassed()
         {
             return _numberOfRowsPassed;
+        }
+
+        public void SetColor(Color color)
+        {
+            var material = gameObject.GetComponent<Renderer>().material;
+            material.color = color;
+            material.SetColor("_EmissionColor", color);
         }
     }
 }

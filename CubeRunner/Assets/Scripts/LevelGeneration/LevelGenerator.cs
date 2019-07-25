@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.Scripts;
 using Assets.Scripts.Blocks;
 using Assets.Scripts.Player;
+using Assets.Scriptss;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -17,6 +18,7 @@ public class LevelGenerator : MonoBehaviour
 
     private System.Random _rnd = new System.Random();
     private int _initialRowOddWidth = 5;
+    private ColorMap _currentLevelColorMap;
 
     public float hazardPercentage = 0.1f;
 
@@ -27,6 +29,8 @@ public class LevelGenerator : MonoBehaviour
     public GameObject mainPlayer;
 
     //TODO REMOVE DEBUG FUNCTION
+
+    
 
     public void SetHazardPercentage(Slider slider)
     {
@@ -57,6 +61,8 @@ public class LevelGenerator : MonoBehaviour
 
     public void ResetLevel()
     {
+        _currentLevelColorMap = BlockColorMaps.SelectRandomColorMapping();
+        mainPlayer.GetComponent<PlayerController>().SetColor(_currentLevelColorMap.PlayerMainColor);
         _rowsSpawned = 0;
         _previousRowState = new List<PreviousBlockState>();
         _distanceToSpawnNextWallQueue =  new Queue<float>();
@@ -120,16 +126,11 @@ public class LevelGenerator : MonoBehaviour
             //TODO REMOVE DEBUG CODE
             //Set color for isreachableAsWell
 
-            if (_previousRowState[i].isValidPath && GameConstants.highlightValidPath)
+            var isOffColorRow = rowNumber % 2 == 0;
+
+            if (floorBlock.GetType() == typeof(FloorBlockController))
             {
-                floorBlock.isValidPath = true;
-                floorBlock.SetValidPathBlockColor(floorBlock.gameObject);
-            } else if (rowNumber % 2 == 0)
-            {
-                if (floorBlock.GetType() == typeof(FloorBlockController))
-                {
-                    floorBlock.SetOffSetColor(floorBlock.gameObject);
-                }
+                floorBlock.SetColor(_currentLevelColorMap.FloorMainColor, isOffColorRow, _previousRowState[i].isValidPath && GameConstants.highlightValidPath);
             }
 
             //TODO END REMOVE DEBUG CODE
@@ -148,22 +149,22 @@ public class LevelGenerator : MonoBehaviour
         {
             leftBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.blockWidth / 2f,
-                0.5f,
+                1f,
                 GameConstants.halfblockWidth);
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.blockWidth / 2f,
-                0.5f,
+                1f,
                 _initialRowOddWidth * GameConstants.blockWidth + GameConstants.halfblockWidth);
         }
         else
         {
             leftBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.halfblockWidth,
-                0.5f,
+                1f,
                 0);
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.halfblockWidth,
-                0.5f,
+                1f,
                 GameConstants.blockWidth + _initialRowOddWidth * GameConstants.blockWidth);
         }
 

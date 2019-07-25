@@ -10,8 +10,6 @@ namespace Assets.Scripts.Blocks
     {
         public Material baseMaterial;
 
-        public bool isValidPath;
-
         private int _rowDistanceBeforeDestruction = 9;
 
         public virtual bool IsHazard()
@@ -73,31 +71,43 @@ namespace Assets.Scripts.Blocks
             baseMaterial.DOFade(255, animationTime);
         }
 
-        public void SetBlockRandomColor(GameObject block)
+//        public void SetBlockRandomColor(GameObject block)
+//        {
+//            if (isValidPath && GameConstants.highlightValidPath)
+//            {
+//                return;
+//            }
+//
+//            if (GameConstants.setRandomColorBlocks)
+//            {
+//                var color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+//                block.GetComponent<Renderer>().material.color = color;
+//                block.GetComponent<Renderer>().material.SetColor("_EmissionColor", color);
+//            }
+//        }
+
+        public void SetColor(Color baseColor, bool isOffColor, bool shouldHighLightYellow)
         {
-            if (isValidPath && GameConstants.highlightValidPath)
+            var material = gameObject.GetComponent<Renderer>().material;
+            if (shouldHighLightYellow)
             {
+                material.color = Color.yellow;
+                material.SetColor("_EmissionColor", Color.yellow);
                 return;
             }
-
-            if (GameConstants.setRandomColorBlocks)
+           
+            if (isOffColor)
             {
-                var color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
-                block.GetComponent<Renderer>().material.color = color;
-                block.GetComponent<Renderer>().material.SetColor("_EmissionColor", color);
+                material.color = baseColor;
+                material.SetColor("_EmissionColor", baseColor);
+            }
+            else
+            {
+                var offColor = new Color(baseColor.r / 1.3f, baseColor.g / 1.3f, baseColor.b/ 1.3f);
+                material.color = offColor;
+                material.SetColor("_EmissionColor", offColor);
             }
         }
 
-        public void SetValidPathBlockColor(GameObject block)
-        {
-            block.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.yellow);
-        }
-
-        public void SetOffSetColor(GameObject block)
-        {
-            var material = block.GetComponent<Renderer>().material;
-            var currentColor = material.GetColor("_EmissionColor");
-            material.SetColor("_EmissionColor", new Color(currentColor.r / 8f, currentColor.g / 8f, currentColor.b / 8f));
-        }
     }
 }
