@@ -1,4 +1,5 @@
-﻿using DG.Tweening;
+﻿using System.Runtime.CompilerServices;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,8 @@ namespace Assets.Scripts.Player
 {
     public class PlayerController : MonoBehaviour
     {
-        public Vector3 initialVelocity;
+        public float initialVelocity;
+        public float currentVelocity;
         public Vector3 initialPosition;
         public Color initialColor;
         public Color highlightColor;
@@ -16,12 +18,13 @@ namespace Assets.Scripts.Player
         private Vector3 _nextPlayerVelocity;
 
         private bool _stopped = true;
+        private bool _canSwitchSides = true;
 
         //TODO REMOVE DEBUG FUNCTION
 
         public void SetInitialVelocity(Slider slider)
         {
-            initialVelocity = new Vector3(slider.value, 0, slider.value);
+            currentVelocity = slider.value;
         }
 
         //END TODO
@@ -36,10 +39,12 @@ namespace Assets.Scripts.Player
         public void ResetPlayer()
         {
             _stopped = false;
+            currentVelocity = initialVelocity;
             transform.position = initialPosition;
             _numberOfRowsPassed = 0;
-            _Rigidbody.velocity = initialVelocity;
+            _Rigidbody.velocity = new Vector3(initialVelocity, 0, initialVelocity);
             _nextPlayerVelocity = _Rigidbody.velocity;
+            _canSwitchSides = true;
         }
 
         public void StopPlayer()
@@ -58,12 +63,17 @@ namespace Assets.Scripts.Player
 
             if (Input.touchCount == 1 && Input.touches[0].phase == TouchPhase.Began)
             {
-                    _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, _Rigidbody.velocity.z * -1);
+                    _nextPlayerVelocity = new Vector3(currentVelocity, 0, _Rigidbody.velocity.z > 0 ? currentVelocity * - 1 : currentVelocity);
             }
 
-            if (Input.GetKeyDown("left"))
+            if (Input.GetKey("a"))
             {
-                _nextPlayerVelocity = new Vector3(_Rigidbody.velocity.x, 0, _Rigidbody.velocity.z * -1);
+                    _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity);
+            }
+
+            if (Input.GetKey("d"))
+            {
+                _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity * -1);
             }
 
             //accelerate
@@ -76,18 +86,46 @@ namespace Assets.Scripts.Player
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.tag == "Wall")
+            Debug.Log("rebound");
+            if (other.gameObject.tag == "Wall" && _canSwitchSides)
             {
-                GameObject.Find("GameController").GetComponent<GameController>().StopGame();
+                Debug.Log("rebound in");
+                
+                // return if already going right direction
+                if (_Rigidbody.velocity.z < 0 && other.gameObject.transform.position.z > 1 ||
+                    _Rigidbody.velocity.z > 0 && other.gameObject.transform.position.z < 1)
+                {
+                    return;
+                }
+
+                _nextPlayerVelocity = new Vector3(currentVelocity, 0, _Rigidbody.velocity.z > 0 ? currentVelocity * -1 : currentVelocity);
+
+                ChangeDirectionsIfNeeded(
+                    other.gameObject.transform.position.x - GameConstants.halfblockWidth,
+                    other.gameObject.transform.position.z > 1 ? other.gameObject.transform.position.z - GameConstants.halfblockWidth : other.gameObject.transform.position.z + GameConstants.halfblockWidth);
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public void ChangeDirectionsIfNeeded(float changeAtXposition, float changeAtZPosition)
         {
+            if (!_canSwitchSides)
+            {
+                return;
+            }
             if (_Rigidbody.velocity == _nextPlayerVelocity)
             {
                 return;
             }
+
+            _canSwitchSides = false;
+
+            ChangePlayerDirection(changeAtXposition, changeAtZPosition);
+        }
+
+        private void ChangePlayerDirection(float changeAtXposition, float changeAtZPosition)
+        {
+            Debug.Log("changeside");
 
             var rotation = _nextPlayerVelocity.z > 0 ? 45 : 135;
 
@@ -98,6 +136,8 @@ namespace Assets.Scripts.Player
 
         public void IncrementNumberOfRowsPassed()
         {
+            Debug.Log("row++ "+transform.position.x);
+            _canSwitchSides = true;
             _numberOfRowsPassed++;
         }
 

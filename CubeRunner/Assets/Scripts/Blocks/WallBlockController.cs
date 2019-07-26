@@ -16,6 +16,11 @@ namespace Assets.Scripts.Blocks
             DestroyIfFarFromPlayer();
         }
 
+        public override void HandlePlayerInteraction(GameObject player)
+        {
+            return;
+        }
+
         private void SetWallColor()
         {
             gameObject.GetComponent<Renderer>().material.color = Color.gray;

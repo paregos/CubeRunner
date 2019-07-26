@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Wall
   - Block
+  - particleSystem
   layers:
   - Default
   - TransparentFX
