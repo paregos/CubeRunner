@@ -19,12 +19,15 @@ namespace Assets.Scripts.Player
 
         private bool _stopped = true;
         private bool _canSwitchSides = true;
+        private bool _shouldIncreaseSpeed = false;
+        private int _rowsToIncreaseSpeedAt = 50;
+        private float _speedIncrease = 0.3f;
 
         //TODO REMOVE DEBUG FUNCTION
 
         public void SetInitialVelocity(Slider slider)
         {
-            currentVelocity = slider.value;
+            //currentVelocity = slider.value;
         }
 
         //END TODO
@@ -38,13 +41,16 @@ namespace Assets.Scripts.Player
 
         public void ResetPlayer()
         {
+            transform.DOKill();
             _stopped = false;
             currentVelocity = initialVelocity;
             transform.position = initialPosition;
+            transform.rotation = Quaternion.Euler(0, 45, 0);
             _numberOfRowsPassed = 0;
             _Rigidbody.velocity = new Vector3(initialVelocity, 0, initialVelocity);
             _nextPlayerVelocity = _Rigidbody.velocity;
             _canSwitchSides = true;
+            _shouldIncreaseSpeed = false;
         }
 
         public void StopPlayer()
@@ -61,49 +67,33 @@ namespace Assets.Scripts.Player
                 return;
             }
 
+            CheckIfPlayerNeedsToForceChangeDirection();
+
+            //accelerate
+            if (_shouldIncreaseSpeed)
+            {
+                currentVelocity = currentVelocity + _speedIncrease;
+                _shouldIncreaseSpeed = false;
+            }
+
             if (Input.touchCount == 1 && Input.touches[0].phase == TouchPhase.Began)
             {
                     _nextPlayerVelocity = new Vector3(currentVelocity, 0, _Rigidbody.velocity.z > 0 ? currentVelocity * - 1 : currentVelocity);
             }
 
-            if (Input.GetKey("a"))
-            {
-                    _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity);
-            }
-
-            if (Input.GetKey("d"))
-            {
-                _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity * -1);
-            }
-
-            //accelerate
-            //_Rigidbody.velocity = new Vector3(_Rigidbody.velocity.x + accelerationRate, 0, _Rigidbody.velocity.z + accelerationRate);
+//            if (Input.GetKey("a"))
+//            {
+//                    _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity);
+//            }
+//
+//            if (Input.GetKey("d"))
+//            {
+//                _nextPlayerVelocity = new Vector3(currentVelocity, 0, currentVelocity * -1);
+//            }
         }
 
         void Update()
         {
-        }
-
-        private void OnTriggerEnter(Collider other)
-        {
-            Debug.Log("rebound");
-            if (other.gameObject.tag == "Wall" && _canSwitchSides)
-            {
-                Debug.Log("rebound in");
-                
-                // return if already going right direction
-                if (_Rigidbody.velocity.z < 0 && other.gameObject.transform.position.z > 1 ||
-                    _Rigidbody.velocity.z > 0 && other.gameObject.transform.position.z < 1)
-                {
-                    return;
-                }
-
-                _nextPlayerVelocity = new Vector3(currentVelocity, 0, _Rigidbody.velocity.z > 0 ? currentVelocity * -1 : currentVelocity);
-
-                ChangeDirectionsIfNeeded(
-                    other.gameObject.transform.position.x - GameConstants.halfblockWidth,
-                    other.gameObject.transform.position.z > 1 ? other.gameObject.transform.position.z - GameConstants.halfblockWidth : other.gameObject.transform.position.z + GameConstants.halfblockWidth);
-            }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
@@ -125,8 +115,6 @@ namespace Assets.Scripts.Player
 
         private void ChangePlayerDirection(float changeAtXposition, float changeAtZPosition)
         {
-            Debug.Log("changeside");
-
             var rotation = _nextPlayerVelocity.z > 0 ? 45 : 135;
 
             transform.DORotate(new Vector3(0, rotation, 0), 0.15f, RotateMode.Fast);
@@ -136,9 +124,12 @@ namespace Assets.Scripts.Player
 
         public void IncrementNumberOfRowsPassed()
         {
-            Debug.Log("row++ "+transform.position.x);
             _canSwitchSides = true;
             _numberOfRowsPassed++;
+            if (_numberOfRowsPassed % _rowsToIncreaseSpeedAt == 0)
+            {
+                _shouldIncreaseSpeed = true;
+            }
         }
 
         public int GetNumberOfRowsPassed()
@@ -151,6 +142,56 @@ namespace Assets.Scripts.Player
             var material = gameObject.GetComponent<Renderer>().material;
             material.color = color;
             material.SetColor("_EmissionColor", color);
+        }
+
+        public void FallDownHole()
+        {
+            _stopped = true;
+            transform.DOMove(new Vector3(transform.position.x, transform.position.y - 10, transform.position.z), 3f);
+        }
+
+        public void GetSpiked()
+        {
+            _stopped = true;
+            transform.DOShakeRotation(1.3f);
+            transform.DOJump(transform.position, .5f, 1, 1f);
+        }
+
+        private void CheckIfPlayerNeedsToForceChangeDirection()
+        {
+            if (transform.position.z < GameConstants.blockWidth)
+            {
+                // need to move left
+                ForcePlayerleft();
+            }else if (transform.position.z > GameConstants.initialRowOddWidth * GameConstants.blockWidth)
+            {
+                ForcePlayerRight();
+            }
+        }
+
+        private void ForcePlayerleft()
+        {
+            _Rigidbody.velocity = new Vector3(currentVelocity, 0, currentVelocity);
+            transform.DORotate(new Vector3(0, 45, 0), 0.15f, RotateMode.Fast);
+            _nextPlayerVelocity = _Rigidbody.velocity;
+            _canSwitchSides = false;
+        }
+
+        private void ForcePlayerRight()
+        {
+            _Rigidbody.velocity = new Vector3(currentVelocity, 0, currentVelocity*-1);
+            transform.DORotate(new Vector3(0, 135, 0), 0.15f, RotateMode.Fast);
+            _nextPlayerVelocity = _Rigidbody.velocity;
+            _canSwitchSides = false;
+        }
+
+        private void CheckKillZone()
+        {
+            if (transform.position.z < GameConstants.halfblockWidth || transform.position.z >
+                GameConstants.initialRowOddWidth * GameConstants.blockWidth + GameConstants.halfblockWidth)
+            {
+                GameObject.Find("GameController").GetComponent<GameController>().StopGame();
+            }
         }
     }
 }

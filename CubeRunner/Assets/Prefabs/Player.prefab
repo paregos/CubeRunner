@@ -323,8 +323,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9228905c9ec3111478bfea9a30bdd914, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialVelocity: 3.48
-  currentVelocity: 3.48
+  initialVelocity: 3
+  currentVelocity: 3
   initialPosition: {x: 1.4, y: 1, z: 4.24264}
   initialColor: {r: 0, g: 0, b: 0, a: 0}
   highlightColor: {r: 1, g: 0.9878479, b: 0, a: 0}
@@ -576,8 +576,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1
-      minScalar: 0.5
+      scalar: 1.5
+      minScalar: 0.4
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -4919,7 +4919,7 @@ ParticleSystemRenderer:
   m_UseCustomVertexStreams: 0
   m_EnableGPUInstancing: 1
   m_VertexStreams: 00010304
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}

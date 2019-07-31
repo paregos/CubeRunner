@@ -17,7 +17,6 @@ public class LevelGenerator : MonoBehaviour
     private int _rowsSpawned = 0;
 
     private System.Random _rnd = new System.Random();
-    private int _initialRowOddWidth = 5;
     private ColorMap _currentLevelColorMap;
 
     public float hazardPercentage = 0.1f;
@@ -25,6 +24,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject wallBlockPrefab;
     public GameObject floorBlockPrefab;
     public GameObject holeBlockPrefab;
+    public GameObject spikeBlockPrefab;
 
     public GameObject mainPlayer;
 
@@ -80,7 +80,7 @@ public class LevelGenerator : MonoBehaviour
     public void SpawnNextRow(float rowNumber)
     {
         var isSmallRow = rowNumber % 2 == 1;
-        var floorRowWidth = isSmallRow ? _initialRowOddWidth - 1 : _initialRowOddWidth;
+        var floorRowWidth = isSmallRow ? GameConstants.initialRowOddWidth - 1 : GameConstants.initialRowOddWidth;
 
         SpawnWalls(rowNumber, isSmallRow);
 
@@ -96,8 +96,15 @@ public class LevelGenerator : MonoBehaviour
             //Create random floor block 
             if (nextRowHazardFlags[i])
             {
-                floorBlock = Instantiate(holeBlockPrefab, blockInitialPosition, Quaternion.Euler(0, 45, 0))
-                    .GetComponent<HoleBlockController>();
+                if (Random.value < 0.70f)
+                {
+                    floorBlock = Instantiate(holeBlockPrefab, blockInitialPosition, Quaternion.Euler(0, 45, 0))
+                        .GetComponent<HoleBlockController>();
+                }else
+                {
+                    floorBlock = Instantiate(spikeBlockPrefab, blockInitialPosition, Quaternion.Euler(0, 45, 0))
+                        .GetComponent<FloorSpikeBlockController>();
+                }
             }
             else
             {
@@ -128,7 +135,7 @@ public class LevelGenerator : MonoBehaviour
 
             var isOffColorRow = rowNumber % 2 == 0;
 
-            if (floorBlock.GetType() == typeof(FloorBlockController))
+            if (floorBlock.GetType() != typeof(HoleBlockController))
             {
                 floorBlock.SetColor(_currentLevelColorMap.FloorMainColor, isOffColorRow, _previousRowState[i].isValidPath && GameConstants.highlightValidPath);
             }
@@ -149,23 +156,23 @@ public class LevelGenerator : MonoBehaviour
         {
             leftBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.blockWidth / 2f,
-                1f,
+                .8f,
                 GameConstants.halfblockWidth);
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.blockWidth / 2f,
-                1f,
-                _initialRowOddWidth * GameConstants.blockWidth + GameConstants.halfblockWidth);
+                .8f,
+                GameConstants.initialRowOddWidth * GameConstants.blockWidth + GameConstants.halfblockWidth);
         }
         else
         {
             leftBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.halfblockWidth,
-                1f,
+                .8f,
                 0);
             rightBlockFinalPosition = new Vector3(
                 rowNumber * GameConstants.halfblockWidth,
-                1f,
-                GameConstants.blockWidth + _initialRowOddWidth * GameConstants.blockWidth);
+                .8f,
+                GameConstants.blockWidth + GameConstants.initialRowOddWidth * GameConstants.blockWidth);
         }
 
         var gameobj1 = Instantiate(wallBlockPrefab,
@@ -186,7 +193,7 @@ public class LevelGenerator : MonoBehaviour
     {
         List<bool> nextRowHazardFlags = new List<bool>();
         Dictionary<int, bool> safeNextRowIndexs = new Dictionary<int, bool>();
-        var nextRowLength = _previousRowState.Count == 0 ? _initialRowOddWidth : isLargeRow(_previousRowState.Count) ? _initialRowOddWidth - 1 : _initialRowOddWidth;
+        var nextRowLength = _previousRowState.Count == 0 ? GameConstants.initialRowOddWidth : isLargeRow(_previousRowState.Count) ? GameConstants.initialRowOddWidth - 1 : GameConstants.initialRowOddWidth;
 
         //For starter rows make them hazard free
         if (_rowsSpawned < GameConstants.rowLeadLength)

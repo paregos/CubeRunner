@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Player;
+using UnityEngine;
 
 namespace Assets.Scripts.Blocks
 {
@@ -15,7 +16,8 @@ namespace Assets.Scripts.Blocks
         {
             if (!_triggeredEnd)
             {
-                player.GetComponent<Rigidbody>().velocity = Vector3.down;
+                player.transform.position = new Vector3(gameObject.transform.position.x, player.transform.position.y, gameObject.transform.position.z);
+                player.GetComponent<PlayerController>().FallDownHole();
                 GameObject.Find("GameController").GetComponent<GameController>().StopGame();
                 _triggeredEnd = true;
             }

@@ -11,5 +11,7 @@ namespace Assets.Scripts
         public static bool highlightValidPath = false;
         public static bool setRandomColorBlocks = false;
         public static float switchAreaValue = 0.2f;
+
+        public static int initialRowOddWidth = 5;
     }
 }
